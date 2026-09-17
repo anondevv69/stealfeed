@@ -31,7 +31,7 @@ from datetime import datetime, timezone
 import bleach
 import markdown
 from fastapi import FastAPI, Form, Header, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, RedirectResponse
 
 # ---------------------------------------------------------------- config
 
@@ -353,6 +353,21 @@ def page(title: str, inner: str, active: str = "") -> str:
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{html.escape(title)} · {SITE_NAME}</title>
 <meta name="description" content="{html.escape(SITE_DESC)}">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:site_name" content="{SITE_NAME}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{_SITE_URL}/">
+<meta property="og:title" content="{html.escape(title)} · {SITE_NAME}">
+<meta property="og:description" content="{html.escape(SITE_DESC)}">
+<meta property="og:image" content="{_SITE_URL}/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{html.escape(title)} · {SITE_NAME}">
+<meta name="twitter:description" content="{html.escape(SITE_DESC)}">
+<meta name="twitter:image" content="{_SITE_URL}/og-image.png">
 <style>{CSS}</style></head><body><div class="wrap">
 <header class="mast"><div class="name"><a href="/"><span class="dollar">$</span>{SITE_NAME[1:]}</a></div>
 <div class="tag">{TAGLINE}</div>
@@ -775,6 +790,29 @@ human to buy. The steal score is the discount off market value: -89% = steal.
 # ---------------------------------------------------------------- app
 
 app = FastAPI(title="StealFeed")
+
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+_SITE_URL = "https://stealfeed.xyz"
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(os.path.join(_STATIC_DIR, "favicon.ico"), media_type="image/x-icon")
+
+
+@app.get("/icon.svg", include_in_schema=False)
+def icon_svg():
+    return FileResponse(os.path.join(_STATIC_DIR, "icon.svg"), media_type="image/svg+xml")
+
+
+@app.get("/apple-touch-icon.png", include_in_schema=False)
+def apple_touch_icon():
+    return FileResponse(os.path.join(_STATIC_DIR, "apple-touch-icon.png"), media_type="image/png")
+
+
+@app.get("/og-image.png", include_in_schema=False)
+def og_image():
+    return FileResponse(os.path.join(_STATIC_DIR, "og-image.png"), media_type="image/png")
 
 _reg_hits: dict[str, list[float]] = {}
 
